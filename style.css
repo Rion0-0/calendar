@@ -258,3 +258,27 @@ button {
     height: 7px;
   }
 }
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.dot.urgent {
+  transform: scale(1.35);
+  box-shadow: 0 0 6px rgba(255, 120, 120, 0.7);
+}
+
+.dot.task {
+  border: 1.5px solid white;
+}
