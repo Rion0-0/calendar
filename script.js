@@ -135,6 +135,7 @@ function renderCalendar(items) {
 
     cell.innerHTML = `
       <div class="day-number">${day}</div>
+
       <div class="dots">
         ${dayItems.map((item) => dotHTML(item)).join("")}
       </div>
@@ -150,15 +151,29 @@ function renderCalendar(items) {
 }
 
 function dotHTML(item) {
+  const color = MEMBER_COLORS[item.member] || "#f4b6c2";
+
+  let extraClass = "";
+
   if (item.priority === "high") {
-    return `<span class="dot urgent"></span>`;
+    extraClass += " urgent";
   }
 
   if (item.kind === "事務") {
-    return `<span class="dot task"></span>`;
+    extraClass += " task";
   }
 
-  return `<span class="dot work"></span>`;
+  if (item.category === "TVer") {
+    extraClass += " tver";
+  }
+
+  return `
+    <span
+      class="dot ${extraClass}"
+      style="background:${color}"
+      title="${escapeHTML(item.title)}"
+    ></span>
+  `;
 }
 
 function renderSelectedList(items) {
@@ -168,7 +183,8 @@ function renderSelectedList(items) {
   const selectedItems = items.filter((item) => item.date === selectedDate);
 
   if (selectedItems.length === 0) {
-    selectedList.innerHTML = `<p class="small">この日の予定はまだないよ🫶</p>`;
+    selectedList.innerHTML =
+      `<p class="small">この日の予定はまだないよ🫶</p>`;
     return;
   }
 
