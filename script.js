@@ -26,47 +26,58 @@ const priority = document.getElementById("priority");
 const repeat = document.getElementById("repeat");
 const memo = document.getElementById("memo");
 const url = document.getElementById("url");
+const addBtn = document.getElementById("addBtn");
+const list = document.getElementById("list");
+const todayList = document.getElementById("todayList");
+const filterMember = document.getElementById("filterMember");
+const filterKind = document.getElementById("filterKind");
+const memberToggleArea = document.getElementById("memberToggleArea");
 
-const addBtn =
-  document.getElementById("addBtn");
-
-const list =
-  document.getElementById("list");
-
-const todayList =
-  document.getElementById("todayList");
-
-const filterMember =
-  document.getElementById("filterMember");
-
-const filterKind =
-  document.getElementById("filterKind");
-
-const memberToggleArea =
-  document.getElementById("memberToggleArea");
-
-let visibleMembers = [...MEMBERS];
 let reminders = [];
+let visibleMembers = [...MEMBERS];
 
-function fillSelect(select, items){
+function fillSelect(select, items) {
+  select.innerHTML = "";
 
-  items.forEach(item=>{
+  items.forEach((item) => {
+    const option = document.createElement("option");
 
-    const option =
-      document.createElement("option");
-
-    if(typeof item === "string"){
+    if (typeof item === "string") {
       option.value = item;
       option.textContent = item;
-    }else{
+    } else {
       option.value = item.value;
       option.textContent = item.label;
     }
 
     select.appendChild(option);
-
   });
+}
 
+function setupMemberToggles() {
+  memberToggleArea.innerHTML = "";
+
+  MEMBERS.forEach((name) => {
+    const label = document.createElement("label");
+    label.className = "member-chip";
+
+    label.innerHTML = `
+      <input type="checkbox" value="${name}" checked />
+      ${name}
+    `;
+
+    const checkbox = label.querySelector("input");
+
+    checkbox.addEventListener("change", () => {
+      visibleMembers = [
+        ...memberToggleArea.querySelectorAll("input:checked")
+      ].map((input) => input.value);
+
+      render();
+    });
+
+    memberToggleArea.appendChild(label);
+  });
 }
 
 fillSelect(member, MEMBERS);
@@ -74,253 +85,203 @@ fillSelect(kind, KINDS);
 fillSelect(category, CATEGORIES);
 fillSelect(priority, PRIORITIES);
 fillSelect(repeat, REPEATS);
+fillSelect(filterMember, ["全員", ...MEMBERS]);
+fillSelect(filterKind, ["すべて", ...KINDS]);
+setupMemberToggles();
 
-fillSelect(filterMember,
-  ["全員", ...MEMBERS]);
+onSnapshot(query(remindersRef), (snapshot) => {
+  reminders = snapshot.docs.map((docItem) => ({
+    id: docItem.id,
+    ...docItem.data()
+  }));
 
-fillSelect(filterKind,
-  ["すべて", ...KINDS]);
+  render();
+});
 
-onSnapshot(
-  query(remindersRef),
-  snapshot => {
+addBtn.addEventListener("click", addReminder);
+filterMember.addEventListener("change", render);
+filterKind.addEventListener("change", render);
 
-    reminders =
-      snapshot.docs.map(doc=>({
-        id:doc.id,
-        ...doc.data()
-      }));
-
-    render();
-
-  }
-);
-
-addBtn.addEventListener(
-  "click",
-  addReminder
-);
-
-filterMember.addEventListener(
-  "change",
-  render
-);
-
-filterKind.addEventListener(
-  "change",
-  render
-);
-
-async function addReminder(){
-
+async function addReminder() {
   const item = {
-
-    title:title.value,
-    date:date.value,
-    time:time.value,
-    member:member.value,
-    kind:kind.value,
-    category:category.value,
-    priority:priority.value,
-    repeat:repeat.value,
-    memo:memo.value,
-    url:url.value,
-    done:false,
-    createdAt:Date.now()
-
+    title: title.value.trim(),
+    date: date.value,
+    time: time.value,
+    member: member.value,
+    kind: kind.value,
+    category: category.value,
+    priority: priority.value,
+    repeat: repeat.value,
+    memo: memo.value.trim(),
+    url: url.value.trim(),
+    done: false,
+    createdAt: Date.now()
   };
 
-  if(!item.title || !item.date){
+  if (!item.title || !item.date) {
     alert("予定名と日付を入れてね！");
     return;
   }
 
-  await addDoc(
-    remindersRef,
-    item
-  );
+  await addDoc(remindersRef, item);
+
+  if (item.repeat !== "none") {
+    await createRepeats(item);
+  }
 
   clearForm();
-
 }
 
-function clearForm(){
+async function createRepeats(base) {
+  const baseDate = new Date(base.date);
 
+  for (let i = 1; i <= 12; i++) {
+    const nextDate = new Date(baseDate);
+
+    if (base.repeat === "weekly") {
+      nextDate.setDate(nextDate.getDate() + 7 * i);
+    }
+
+    if (base.repeat === "monthly") {
+      nextDate.setMonth(nextDate.getMonth() + i);
+    }
+
+    await addDoc(remindersRef, {
+      ...base,
+      title: `${base.title}（定期）`,
+      date: nextDate.toISOString().slice(0, 10),
+      createdAt: Date.now()
+    });
+  }
+}
+
+function clearForm() {
   title.value = "";
   date.value = "";
   time.value = "";
   memo.value = "";
   url.value = "";
-
 }
 
-function render(){
-
+function render() {
   list.innerHTML = "";
   todayList.innerHTML = "";
 
-  const filtered =
-    reminders
-      .filter(item => {
+  const filtered = reminders
+    .filter((item) => visibleMembers.includes(item.member))
+    .filter((item) => {
+      const memberOk =
+        filterMember.value === "全員" ||
+        item.member === filterMember.value;
 
-        const memberOk =
-          filterMember.value === "全員"
-          || item.member === filterMember.value;
+      const kindOk =
+        filterKind.value === "すべて" ||
+        item.kind === filterKind.value;
 
-        const kindOk =
-          filterKind.value === "すべて"
-          || item.kind === filterKind.value;
+      return memberOk && kindOk;
+    })
+    .sort((a, b) =>
+      `${a.date}${a.time || ""}`.localeCompare(`${b.date}${b.time || ""}`)
+    );
 
-        return memberOk && kindOk;
-
-      })
-      .sort((a,b)=>
-        (a.date+a.time)
-        .localeCompare(b.date+b.time)
-      );
-
-  filtered.forEach(item=>{
-
-    const html =
-      createCard(item);
+  filtered.forEach((item) => {
+    const html = createCard(item);
 
     list.innerHTML += html;
 
-    if(
-      item.kind === "事務"
-      && daysLeft(item.date) <= 1
-      && !item.done
-    ){
+    if (
+      item.kind === "事務" &&
+      daysLeft(item.date) <= 1 &&
+      !item.done
+    ) {
       todayList.innerHTML += html;
     }
-
   });
 
+  if (!todayList.innerHTML) {
+    todayList.innerHTML =
+      `<p class="small">今日急ぎの事務タスクはなさそう🫶</p>`;
+  }
+
+  if (!list.innerHTML) {
+    list.innerHTML =
+      `<p class="small">表示できる予定がまだないよ！</p>`;
+  }
 }
 
-function createCard(item){
-
+function createCard(item) {
   return `
-  <div class="card ${item.priority} ${item.done ? "done" : ""}">
+    <div class="card ${item.priority} ${item.done ? "done" : ""}">
+      <h3>${escapeHTML(item.title)}</h3>
 
-    <h3>${item.title}</h3>
+      <span class="badge">${escapeHTML(item.member)}</span>
+      <span class="badge">${escapeHTML(item.kind)}</span>
+      <span class="badge">${escapeHTML(item.category)}</span>
 
-    <span class="badge">${item.member}</span>
+      <p>
+        <b>${escapeHTML(item.date)}</b>
+        ${item.time ? escapeHTML(item.time) : ""}
+        / ${labelDays(item.date)}
+      </p>
 
-    <span class="badge">${item.kind}</span>
+      ${item.memo ? `<p>${escapeHTML(item.memo)}</p>` : ""}
 
-    <span class="badge">${item.category}</span>
+      <div class="links">
+        ${
+          item.url
+            ? `<a href="${escapeHTML(item.url)}" target="_blank">公式サイト</a>`
+            : ""
+        }
+      </div>
 
-    <p>
-      ${item.date}
-      ${item.time || ""}
-      / ${labelDays(item.date)}
-    </p>
+      <button onclick="toggleDone('${item.id}', ${item.done})">
+        ${item.done ? "未処理に戻す" : "処理済みにする"}
+      </button>
 
-    ${
-      item.memo
-      ? `<p>${item.memo}</p>`
-      : ""
-    }
-
-    <div class="links">
-
-      ${
-        item.url
-        ? `
-        <a
-          href="${item.url}"
-          target="_blank"
-        >
-          公式サイト
-        </a>
-        `
-        : ""
-      }
-
+      <button onclick="deleteReminder('${item.id}')">
+        削除
+      </button>
     </div>
-
-    <button
-      onclick="toggleDone('${item.id}', ${item.done})"
-    >
-      ${
-        item.done
-        ? "未処理"
-        : "処理済み"
-      }
-    </button>
-
-    <button
-      onclick="deleteReminder('${item.id}')"
-    >
-      削除
-    </button>
-
-  </div>
   `;
-
 }
 
-function daysLeft(dateStr){
+function daysLeft(dateStr) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  const today =
-    new Date();
+  const target = new Date(dateStr);
+  target.setHours(0, 0, 0, 0);
 
-  today.setHours(0,0,0,0);
-
-  const target =
-    new Date(dateStr);
-
-  target.setHours(0,0,0,0);
-
-  return Math.ceil(
-    (target - today)
-    / 86400000
-  );
-
+  return Math.ceil((target - today) / 86400000);
 }
 
-function labelDays(dateStr){
+function labelDays(dateStr) {
+  const d = daysLeft(dateStr);
 
-  const d =
-    daysLeft(dateStr);
-
-  if(d < 0){
-    return `${Math.abs(d)}日前`;
-  }
-
-  if(d === 0){
-    return "今日";
-  }
-
-  if(d === 1){
-    return "明日";
-  }
+  if (d < 0) return `${Math.abs(d)}日前`;
+  if (d === 0) return "今日";
+  if (d === 1) return "明日";
 
   return `あと${d}日`;
-
 }
 
-window.deleteReminder =
-async function(id){
+function escapeHTML(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
-  await deleteDoc(
-    doc(
-      remindersRef,
-      id
-    )
-  );
+window.deleteReminder = async function(id) {
+  if (!confirm("削除する？")) return;
 
+  await deleteDoc(doc(remindersRef, id));
 };
 
-window.toggleDone =
-async function(id, done){
-
-  await updateDoc(
-    doc(remindersRef, id),
-    {
-      done:!done
-    }
-  );
-
+window.toggleDone = async function(id, done) {
+  await updateDoc(doc(remindersRef, id), {
+    done: !done
+  });
 };
