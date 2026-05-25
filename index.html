@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kis-My Reminder</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <h1>🎀 Kis-My Reminder</h1>
+
+  <div class="quick">
+    <b>📌 クイックアクセス</b><br>
+
+    <a href="https://www.fc-member.familyclub.jp/" target="_blank">
+      FCログイン
+    </a>
+
+    <a href="https://starto.jp/" target="_blank">
+      STARTO
+    </a>
+
+    <a href="https://mentrecording.jp/kismyft2/" target="_blank">
+      MENT
+    </a>
+
+    <a href="https://tver.jp/" target="_blank">
+      TVer
+    </a>
+  </div>
+
+  <div class="form">
+
+    <input id="title" placeholder="予定名" />
+
+    <div class="row">
+      <input id="date" type="date" />
+      <input id="time" type="time" />
+    </div>
+
+    <div class="row">
+      <select id="member"></select>
+      <select id="kind"></select>
+    </div>
+
+    <div class="row">
+      <select id="category"></select>
+      <select id="priority"></select>
+    </div>
+
+    <select id="repeat"></select>
+
+    <textarea
+      id="memo"
+      placeholder="メモ"
+    ></textarea>
+
+    <input
+      id="url"
+      placeholder="公式サイトURL"
+    />
+
+    <button id="addBtn">
+      追加
+    </button>
+
+  </div>
+
+  <div class="row">
+    <select id="filterMember"></select>
+    <select id="filterKind"></select>
+  </div>
+
+  <h2>🔥 今日やること</h2>
+  <div id="todayList"></div>
+
+  <h2>📅 予定一覧</h2>
+  <div id="list"></div>
+
+</div>
+
+<script type="module" src="script.js"></script>
+
+</body>
+</html>
