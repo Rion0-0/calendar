@@ -241,28 +241,13 @@ function renderTodayTasks(items) {
 
 function createCard(item) {
   return `
-    <div class="card ${item.priority} ${item.done ? "done" : ""}">
-      <h3>${escapeHTML(item.title)}</h3>
+    <div class="card">
 
-      <span class="badge">${escapeHTML(item.member)}</span>
-      <span class="badge">${escapeHTML(item.kind)}</span>
-      <span class="badge">${escapeHTML(item.category)}</span>
+      ...
 
-      <p>
-        <b>${escapeHTML(item.date)}</b>
-        ${item.time ? escapeHTML(item.time) : ""}
-        / ${labelDays(item.date)}
-      </p>
-
-      ${item.memo ? `<p>${escapeHTML(item.memo)}</p>` : ""}
-
-      <div class="links">
-        ${
-          item.url
-            ? `<a href="${escapeHTML(item.url)}" target="_blank">公式サイト</a>`
-            : ""
-        }
-      </div>
+      <button onclick="editReminder('${item.id}')">
+        編集
+      </button>
 
       <button onclick="toggleDone('${item.id}', ${item.done})">
         ${item.done ? "未処理に戻す" : "処理済みにする"}
@@ -271,10 +256,10 @@ function createCard(item) {
       <button onclick="deleteReminder('${item.id}')">
         削除
       </button>
+
     </div>
   `;
 }
-
 function makeDateString(year, month, day) {
   const mm = String(month + 1).padStart(2, "0");
   const dd = String(day).padStart(2, "0");
