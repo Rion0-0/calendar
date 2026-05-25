@@ -1,4 +1,4 @@
-import { MEMBERS } from "./data.js";
+import { MEMBERS, MEMBER_COLORS } from "./data.js";
 
 import {
   remindersRef,
@@ -8,8 +8,6 @@ import {
   onSnapshot,
   query
 } from "./firebase.js";
-
-import { MEMBER_COLORS } from "./data.js";
 
 const monthTitle = document.getElementById("monthTitle");
 const calendar = document.getElementById("calendar");
@@ -24,7 +22,7 @@ let reminders = [];
 let visibleMembers = [...MEMBERS];
 
 let currentYear = 2026;
-let currentMonth = 4; // 5月
+let currentMonth = 4;
 let selectedDate = "2026-05-01";
 
 setupMemberToggles();
@@ -77,9 +75,8 @@ function setupMemberToggles() {
     const checkbox = label.querySelector("input");
 
     checkbox.addEventListener("change", () => {
-      visibleMembers = [
-        ...memberToggleArea.querySelectorAll("input:checked")
-      ].map((input) => input.value);
+      visibleMembers = [...memberToggleArea.querySelectorAll("input:checked")]
+        .map((input) => input.value);
 
       render();
     });
@@ -102,7 +99,6 @@ function render() {
 
 function renderCalendar(items) {
   calendar.innerHTML = "";
-
   monthTitle.textContent = `${currentYear}年 ${currentMonth + 1}月`;
 
   const firstDay = new Date(currentYear, currentMonth, 1);
@@ -119,47 +115,16 @@ function renderCalendar(items) {
 
   for (let day = 1; day <= daysInMonth; day++) {
     const dateStr = makeDateString(currentYear, currentMonth, day);
-
-const dayItems = items.filter((item) => {
-  if (item.date === dateStr) return true;
-
-  if (item.repeat === "weekly") {
-    const original = new Date(item.date);
-    const current = new Date(dateStr);
-
-    return (
-      original.getDay() === current.getDay() &&
-      current >= original
-    );
-  }
-
-  if (item.repeat === "monthly") {
-    const original = new Date(item.date);
-    const current = new Date(dateStr);
-
-    return (
-      original.getDate() === current.getDate() &&
-      current >= original
-    );
-  }
-
-  return false;
-});
+    const dayItems = items.filter((item) => isReminderOnDate(item, dateStr));
 
     const cell = document.createElement("div");
     cell.className = "day";
 
-    if (dateStr === todayString()) {
-      cell.classList.add("today");
-    }
-
-    if (dateStr === selectedDate) {
-      cell.classList.add("selected");
-    }
+    if (dateStr === todayString()) cell.classList.add("today");
+    if (dateStr === selectedDate) cell.classList.add("selected");
 
     cell.innerHTML = `
       <div class="day-number">${day}</div>
-
       <div class="dots">
         ${dayItems.map((item) => dotHTML(item)).join("")}
       </div>
@@ -174,22 +139,36 @@ const dayItems = items.filter((item) => {
   }
 }
 
+function isReminderOnDate(item, dateStr) {
+  if (item.date === dateStr) return true;
+
+  const original = new Date(item.date);
+  const current = new Date(dateStr);
+
+  original.setHours(0, 0, 0, 0);
+  current.setHours(0, 0, 0, 0);
+
+  if (current < original) return false;
+
+  if (item.repeat === "weekly") {
+    return original.getDay() === current.getDay();
+  }
+
+  if (item.repeat === "monthly") {
+    return original.getDate() === current.getDate();
+  }
+
+  return false;
+}
+
 function dotHTML(item) {
   const color = MEMBER_COLORS[item.member] || "#f4b6c2";
 
   let extraClass = "";
 
-  if (item.priority === "high") {
-    extraClass += " urgent";
-  }
-
-  if (item.kind === "事務") {
-    extraClass += " task";
-  }
-
-  if (item.category === "TVer") {
-    extraClass += " tver";
-  }
+  if (item.priority === "high") extraClass += " urgent";
+  if (item.kind === "事務") extraClass += " task";
+  if (item.category === "📱 TVer期限") extraClass += " tver";
 
   return `
     <span
@@ -204,26 +183,29 @@ function renderSelectedList(items) {
   selectedDateTitle.textContent = `${formatDate(selectedDate)} の予定`;
   selectedList.innerHTML = "";
 
-  const selectedItems = items.filter((item) => item.date === selectedDate);
+  const selectedItems = items.filter((item) =>
+    isReminderOnDate(item, selectedDate)
+  );
 
   if (selectedItems.length === 0) {
-    selectedList.innerHTML =
-      `<p class="small">この日の予定はまだないよ🫶</p>`;
+    selectedList.innerHTML = `<p class="small">この日の予定はまだないよ🫶</p>`;
     return;
   }
 
   selectedItems.forEach((item) => {
-    selectedList.innerHTML += createCard(item);
+    selectedList.innerHTML += createCard(item, selectedDate);
   });
 }
 
 function renderTodayTasks(items) {
   todayList.innerHTML = "";
 
+  const today = todayString();
+
   const taskItems = items.filter((item) => {
     return (
       item.kind === "事務" &&
-      daysLeft(item.date) <= 1 &&
+      isReminderOnDate(item, today) &&
       !item.done
     );
   });
@@ -235,15 +217,39 @@ function renderTodayTasks(items) {
   }
 
   taskItems.forEach((item) => {
-    todayList.innerHTML += createCard(item);
+    todayList.innerHTML += createCard(item, today);
   });
 }
 
-function createCard(item) {
-  return `
-    <div class="card">
+function createCard(item, viewDate) {
+  const isRepeat = item.repeat && item.repeat !== "none";
 
-      ...
+  return `
+    <div class="card ${item.priority} ${item.done ? "done" : ""}">
+      <h3>${escapeHTML(item.title)}</h3>
+
+      <span class="badge">${escapeHTML(item.member)}</span>
+      <span class="badge">${escapeHTML(item.kind)}</span>
+      <span class="badge">${escapeHTML(item.category)}</span>
+      ${isRepeat ? `<span class="badge">繰り返し</span>` : ""}
+
+      <p>
+        <b>${escapeHTML(viewDate)}</b>
+        ${item.time ? escapeHTML(item.time) : ""}
+        / ${labelDays(viewDate)}
+      </p>
+
+      ${isRepeat ? `<p class="small">初回登録日：${escapeHTML(item.date)}</p>` : ""}
+
+      ${item.memo ? `<p>${escapeHTML(item.memo)}</p>` : ""}
+
+      <div class="links">
+        ${
+          item.url
+            ? `<a href="${escapeHTML(item.url)}" target="_blank">公式サイト</a>`
+            : ""
+        }
+      </div>
 
       <button onclick="editReminder('${item.id}')">
         編集
@@ -256,14 +262,13 @@ function createCard(item) {
       <button onclick="deleteReminder('${item.id}')">
         削除
       </button>
-
     </div>
   `;
 }
+
 function makeDateString(year, month, day) {
   const mm = String(month + 1).padStart(2, "0");
   const dd = String(day).padStart(2, "0");
-
   return `${year}-${mm}-${dd}`;
 }
 
@@ -336,7 +341,7 @@ window.editReminder = async function(id) {
   const newTitle = prompt("タイトルを編集", item.title);
   if (newTitle === null) return;
 
-  const newDate = prompt("日付を編集（例：2026-05-04）", item.date);
+  const newDate = prompt("初回日付を編集（例：2026-05-04）", item.date);
   if (newDate === null) return;
 
   const newTime = prompt("時間を編集（例：19:00 / 空欄OK）", item.time || "");
