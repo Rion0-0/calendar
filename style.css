@@ -378,3 +378,58 @@ button:disabled {
     border-radius: 14px;
   }
 }
+
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.month-nav button,
+#prevMonth,
+#nextMonth {
+  flex: 1;
+  height: 56px;
+  border: none;
+  border-radius: 16px;
+  background: #ff75b6;
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+  text-align: center;
+  font-weight: bold;
+  color: #777;
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.day {
+  min-height: 68px;
+  border-radius: 14px;
+  background: white;
+  border: 1px solid #ffd4e5;
+  padding: 10px;
+  text-align: center;
+}
+
+.day.empty {
+  background: transparent;
+  border: none;
+}
+
+.day.selected {
+  background: #ffd8eb;
+  border: 2px solid #ff75b6;
+}
