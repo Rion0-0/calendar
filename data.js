@@ -35,33 +35,18 @@ export const CATEGORIES = [
   "🎯 当落",
   "📚 雑誌",
   "🎥 YouTube",
-  "📻 ラジオ",
+  "📻 RADIO",
   "💿 リリース",
   "📝 その他"
 ];
 
 export const PRIORITIES = [
-  {
-    value: "normal",
-    label: "ゆるめ"
-  },
-  {
-    value: "high",
-    label: "重要"
-  }
+  { value: "normal", label: "ゆるめ" },
+  { value: "high", label: "重要" }
 ];
 
 export const REPEATS = [
-  {
-    value: "none",
-    label: "繰り返しなし"
-  },
-  {
-    value: "weekly",
-    label: "毎週"
-  },
-  {
-    value: "monthly",
-    label: "毎月"
-  }
+  { value: "none", label: "繰り返しなし" },
+  { value: "weekly", label: "毎週" },
+  { value: "monthly", label: "毎月" }
 ];
