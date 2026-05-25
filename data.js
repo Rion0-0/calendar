@@ -20,54 +20,48 @@ export const MEMBER_COLORS = {
 
 export const KINDS = [
   "仕事",
-  "事務"
+  "事務",
+  "現場",
+  "メディア",
+  "遠征",
+  "その他"
 ];
 
 export const CATEGORIES = [
   "📺 TV",
-  "📻 RADIO",
-  "📚 雑誌",
-  "💿 CD/DVD",
-  "🎬 ドラマ/映画",
-  "🌐 WEB",
-  "🎤 ライブ/イベント",
-  "🎫 申込開始",
-  "⏰ 申込締切",
-  "✅ 当落発表",
+  "📱 TVer期限",
+  "🎤 ライブ",
   "💸 入金期限",
-  "🛍 グッズ",
-  "🚄 遠征",
-  "🏨 ホテル",
-  "📦 発送/受取",
-  "📝 メモ"
+  "🎯 当落",
+  "📚 雑誌",
+  "🎥 YouTube",
+  "📻 ラジオ",
+  "💿 リリース",
+  "📝 その他"
 ];
 
 export const PRIORITIES = [
   {
-    label:"🔥重要",
-    value:"high"
+    value: "normal",
+    label: "ゆるめ"
   },
   {
-    label:"普通",
-    value:"normal"
-  },
-  {
-    label:"ゆるめ",
-    value:"low"
+    value: "high",
+    label: "重要"
   }
 ];
 
 export const REPEATS = [
   {
-    label:"繰り返しなし",
-    value:"none"
+    value: "none",
+    label: "繰り返しなし"
   },
   {
-    label:"毎週",
-    value:"weekly"
+    value: "weekly",
+    label: "毎週"
   },
   {
-    label:"毎月",
-    value:"monthly"
+    value: "monthly",
+    label: "毎月"
   }
 ];
