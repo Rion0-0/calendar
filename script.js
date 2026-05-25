@@ -1,14 +1,7 @@
-import {
-  MEMBERS,
-  KINDS,
-  CATEGORIES,
-  PRIORITIES,
-  REPEATS
-} from "./data.js";
+import { MEMBERS } from "./data.js";
 
 import {
   remindersRef,
-  addDoc,
   deleteDoc,
   doc,
   updateDoc,
@@ -16,43 +9,56 @@ import {
   query
 } from "./firebase.js";
 
-const title = document.getElementById("title");
-const date = document.getElementById("date");
-const time = document.getElementById("time");
-const member = document.getElementById("member");
-const kind = document.getElementById("kind");
-const category = document.getElementById("category");
-const priority = document.getElementById("priority");
-const repeat = document.getElementById("repeat");
-const memo = document.getElementById("memo");
-const url = document.getElementById("url");
-const addBtn = document.getElementById("addBtn");
-const list = document.getElementById("list");
+const monthTitle = document.getElementById("monthTitle");
+const calendar = document.getElementById("calendar");
+const selectedDateTitle = document.getElementById("selectedDateTitle");
+const selectedList = document.getElementById("selectedList");
 const todayList = document.getElementById("todayList");
-const filterMember = document.getElementById("filterMember");
-const filterKind = document.getElementById("filterKind");
 const memberToggleArea = document.getElementById("memberToggleArea");
+const prevMonth = document.getElementById("prevMonth");
+const nextMonth = document.getElementById("nextMonth");
 
 let reminders = [];
 let visibleMembers = [...MEMBERS];
 
-function fillSelect(select, items) {
-  select.innerHTML = "";
+let currentYear = 2026;
+let currentMonth = 4; // 5月
+let selectedDate = "2026-05-01";
 
-  items.forEach((item) => {
-    const option = document.createElement("option");
+setupMemberToggles();
 
-    if (typeof item === "string") {
-      option.value = item;
-      option.textContent = item;
-    } else {
-      option.value = item.value;
-      option.textContent = item.label;
-    }
+onSnapshot(query(remindersRef), (snapshot) => {
+  reminders = snapshot.docs.map((docItem) => ({
+    id: docItem.id,
+    ...docItem.data()
+  }));
 
-    select.appendChild(option);
-  });
-}
+  render();
+});
+
+prevMonth.addEventListener("click", () => {
+  currentMonth--;
+
+  if (currentMonth < 0) {
+    currentMonth = 11;
+    currentYear--;
+  }
+
+  selectedDate = makeDateString(currentYear, currentMonth, 1);
+  render();
+});
+
+nextMonth.addEventListener("click", () => {
+  currentMonth++;
+
+  if (currentMonth > 11) {
+    currentMonth = 0;
+    currentYear++;
+  }
+
+  selectedDate = makeDateString(currentYear, currentMonth, 1);
+  render();
+});
 
 function setupMemberToggles() {
   memberToggleArea.innerHTML = "";
@@ -80,133 +86,115 @@ function setupMemberToggles() {
   });
 }
 
-fillSelect(member, MEMBERS);
-fillSelect(kind, KINDS);
-fillSelect(category, CATEGORIES);
-fillSelect(priority, PRIORITIES);
-fillSelect(repeat, REPEATS);
-fillSelect(filterMember, ["全員", ...MEMBERS]);
-fillSelect(filterKind, ["すべて", ...KINDS]);
-setupMemberToggles();
-
-onSnapshot(query(remindersRef), (snapshot) => {
-  reminders = snapshot.docs.map((docItem) => ({
-    id: docItem.id,
-    ...docItem.data()
-  }));
-
-  render();
-});
-
-addBtn.addEventListener("click", addReminder);
-filterMember.addEventListener("change", render);
-filterKind.addEventListener("change", render);
-
-async function addReminder() {
-  const item = {
-    title: title.value.trim(),
-    date: date.value,
-    time: time.value,
-    member: member.value,
-    kind: kind.value,
-    category: category.value,
-    priority: priority.value,
-    repeat: repeat.value,
-    memo: memo.value.trim(),
-    url: url.value.trim(),
-    done: false,
-    createdAt: Date.now()
-  };
-
-  if (!item.title || !item.date) {
-    alert("予定名と日付を入れてね！");
-    return;
-  }
-
-  await addDoc(remindersRef, item);
-
-  if (item.repeat !== "none") {
-    await createRepeats(item);
-  }
-
-  clearForm();
-}
-
-async function createRepeats(base) {
-  const baseDate = new Date(base.date);
-
-  for (let i = 1; i <= 12; i++) {
-    const nextDate = new Date(baseDate);
-
-    if (base.repeat === "weekly") {
-      nextDate.setDate(nextDate.getDate() + 7 * i);
-    }
-
-    if (base.repeat === "monthly") {
-      nextDate.setMonth(nextDate.getMonth() + i);
-    }
-
-    await addDoc(remindersRef, {
-      ...base,
-      title: `${base.title}（定期）`,
-      date: nextDate.toISOString().slice(0, 10),
-      createdAt: Date.now()
-    });
-  }
-}
-
-function clearForm() {
-  title.value = "";
-  date.value = "";
-  time.value = "";
-  memo.value = "";
-  url.value = "";
-}
-
 function render() {
-  list.innerHTML = "";
-  todayList.innerHTML = "";
-
   const filtered = reminders
     .filter((item) => visibleMembers.includes(item.member))
-    .filter((item) => {
-      const memberOk =
-        filterMember.value === "全員" ||
-        item.member === filterMember.value;
-
-      const kindOk =
-        filterKind.value === "すべて" ||
-        item.kind === filterKind.value;
-
-      return memberOk && kindOk;
-    })
     .sort((a, b) =>
       `${a.date}${a.time || ""}`.localeCompare(`${b.date}${b.time || ""}`)
     );
 
-  filtered.forEach((item) => {
-    const html = createCard(item);
+  renderCalendar(filtered);
+  renderSelectedList(filtered);
+  renderTodayTasks(filtered);
+}
 
-    list.innerHTML += html;
+function renderCalendar(items) {
+  calendar.innerHTML = "";
 
-    if (
+  monthTitle.textContent = `${currentYear}年 ${currentMonth + 1}月`;
+
+  const firstDay = new Date(currentYear, currentMonth, 1);
+  const lastDay = new Date(currentYear, currentMonth + 1, 0);
+
+  const startWeekDay = firstDay.getDay();
+  const daysInMonth = lastDay.getDate();
+
+  for (let i = 0; i < startWeekDay; i++) {
+    const empty = document.createElement("div");
+    empty.className = "day empty";
+    calendar.appendChild(empty);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = makeDateString(currentYear, currentMonth, day);
+
+    const dayItems = items.filter((item) => item.date === dateStr);
+
+    const cell = document.createElement("div");
+    cell.className = "day";
+
+    if (dateStr === todayString()) {
+      cell.classList.add("today");
+    }
+
+    if (dateStr === selectedDate) {
+      cell.classList.add("selected");
+    }
+
+    cell.innerHTML = `
+      <div class="day-number">${day}</div>
+      <div class="dots">
+        ${dayItems.map((item) => dotHTML(item)).join("")}
+      </div>
+    `;
+
+    cell.addEventListener("click", () => {
+      selectedDate = dateStr;
+      render();
+    });
+
+    calendar.appendChild(cell);
+  }
+}
+
+function dotHTML(item) {
+  if (item.priority === "high") {
+    return `<span class="dot urgent"></span>`;
+  }
+
+  if (item.kind === "事務") {
+    return `<span class="dot task"></span>`;
+  }
+
+  return `<span class="dot work"></span>`;
+}
+
+function renderSelectedList(items) {
+  selectedDateTitle.textContent = `${formatDate(selectedDate)} の予定`;
+  selectedList.innerHTML = "";
+
+  const selectedItems = items.filter((item) => item.date === selectedDate);
+
+  if (selectedItems.length === 0) {
+    selectedList.innerHTML = `<p class="small">この日の予定はまだないよ🫶</p>`;
+    return;
+  }
+
+  selectedItems.forEach((item) => {
+    selectedList.innerHTML += createCard(item);
+  });
+}
+
+function renderTodayTasks(items) {
+  todayList.innerHTML = "";
+
+  const taskItems = items.filter((item) => {
+    return (
       item.kind === "事務" &&
       daysLeft(item.date) <= 1 &&
       !item.done
-    ) {
-      todayList.innerHTML += html;
-    }
+    );
   });
 
-  if (!todayList.innerHTML) {
+  if (taskItems.length === 0) {
     todayList.innerHTML =
       `<p class="small">今日急ぎの事務タスクはなさそう🫶</p>`;
+    return;
   }
 
-  if (!list.innerHTML) {
-    list.innerHTML =
-      `<p class="small">表示できる予定がまだないよ！</p>`;
-  }
+  taskItems.forEach((item) => {
+    todayList.innerHTML += createCard(item);
+  });
 }
 
 function createCard(item) {
@@ -243,6 +231,30 @@ function createCard(item) {
       </button>
     </div>
   `;
+}
+
+function makeDateString(year, month, day) {
+  const mm = String(month + 1).padStart(2, "0");
+  const dd = String(day).padStart(2, "0");
+
+  return `${year}-${mm}-${dd}`;
+}
+
+function todayString() {
+  const today = new Date();
+
+  return makeDateString(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
+}
+
+function formatDate(dateStr) {
+  const date = new Date(dateStr);
+  const week = ["日", "月", "火", "水", "木", "金", "土"];
+
+  return `${date.getMonth() + 1}月${date.getDate()}日（${week[date.getDay()]}）`;
 }
 
 function daysLeft(dateStr) {
