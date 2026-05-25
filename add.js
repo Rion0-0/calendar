@@ -159,3 +159,5 @@ async function createRepeats(base) {
     });
   }
 }
+button.addEventListener("click", () => {
+  alert("テンプレ押せた！");
