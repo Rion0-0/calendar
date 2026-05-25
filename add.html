@@ -2,34 +2,33 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>予定追加</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="./style.css?v=3" />
 </head>
 <body>
 
 <div class="app">
 
   <header class="top">
-    <h1>➕ 予定追加</h1>
-    <a class="add-link" href="index.html">← カレンダーへ</a>
+    <h1>＋ 予定追加</h1>
+    <a class="add-link" href="./index.html">← カレンダーへ</a>
   </header>
 
-<form id="addForm" class="form">
+  <div class="template-area">
+    <button type="button" class="template-btn" data-template="tv">📺 TV</button>
+    <button type="button" class="template-btn" data-template="tver">📱 TVer期限</button>
+    <button type="button" class="template-btn" data-template="live">🎤 ライブ</button>
+    <button type="button" class="template-btn" data-template="payment">💸 入金期限</button>
+    <button type="button" class="template-btn" data-template="result">🎯 当落</button>
+    <button type="button" class="template-btn" data-template="magazine">📚 雑誌</button>
+  </div>
 
-    <div class="template-area">
-      <button type="button" class="template-btn" data-template="tv">📺 TV</button>
-      <button type="button" class="template-btn" data-template="tver">📱 TVer期限</button>
-      <button type="button" class="template-btn" data-template="live">🎤 ライブ</button>
-      <button type="button" class="template-btn" data-template="payment">💸 入金期限</button>
-      <button type="button" class="template-btn" data-template="lottery">🎯 当落</button>
-      <button type="button" class="template-btn" data-template="magazine">📚 雑誌</button>
-    </div>
-
-    <input id="title" placeholder="予定名" />
+  <form id="addForm" class="form">
+    <input id="title" type="text" placeholder="タイトル" required />
 
     <div class="row">
-      <input id="date" type="date" />
+      <input id="date" type="date" required />
       <input id="time" type="time" />
     </div>
 
@@ -46,13 +45,14 @@
     <select id="repeat"></select>
 
     <textarea id="memo" placeholder="メモ"></textarea>
-    <input id="url" placeholder="公式サイトURL" />
 
-  <button id="addBtn" type="submit">追加</button>
+    <input id="url" type="url" placeholder="公式サイトURL" />
+
+    <button id="addBtn" type="submit">追加</button>
   </form>
 
 </div>
 
-<script type="module" src="add.js"></script>
+<script type="module" src="./add.js?v=3"></script>
 </body>
 </html>
