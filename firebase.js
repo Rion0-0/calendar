@@ -15,22 +15,22 @@ import {
 
 const firebaseConfig = {
 
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIza....",
 
   authDomain:
-    "YOUR_PROJECT.firebaseapp.com",
+    "kismy-reminder.firebaseapp.com",
 
   projectId:
-    "YOUR_PROJECT_ID",
+    "kismy-reminder",
 
   storageBucket:
-    "YOUR_PROJECT.appspot.com",
+    "kismy-reminder.firebasestorage.app",
 
   messagingSenderId:
-    "YOUR_SENDER_ID",
+    "147258225533",
 
   appId:
-    "YOUR_APP_ID"
+    "1:147258225533:web:..."
 };
 
 const app =
