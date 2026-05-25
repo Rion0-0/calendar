@@ -102,3 +102,53 @@ async function createRepeats(base) {
     });
   }
 }
+
+const templates = {
+  tv: {
+    kind: "メディア",
+    category: "TV",
+    priority: "normal"
+  },
+  tver: {
+    kind: "事務",
+    category: "TVer",
+    priority: "high",
+    memo: "見逃し配信期限"
+  },
+  live: {
+    kind: "現場",
+    category: "ライブ",
+    priority: "high"
+  },
+  payment: {
+    kind: "事務",
+    category: "入金期限",
+    priority: "high",
+    memo: "忘れずに入金"
+  },
+  lottery: {
+    kind: "事務",
+    category: "当落",
+    priority: "high",
+    memo: "当落確認"
+  },
+  magazine: {
+    kind: "メディア",
+    category: "雑誌",
+    priority: "normal"
+  }
+};
+
+document.querySelectorAll(".template-btn").forEach((button) => {
+  button.addEventListener("click", () => {
+    const template = templates[button.dataset.template];
+
+    document.getElementById("kind").value = template.kind;
+    document.getElementById("category").value = template.category;
+    document.getElementById("priority").value = template.priority;
+
+    if (template.memo) {
+      document.getElementById("memo").value = template.memo;
+    }
+  });
+});
