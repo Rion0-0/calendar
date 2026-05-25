@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>予定追加</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <header class="top">
+    <h1>➕ 予定追加</h1>
+    <a class="add-link" href="index.html">← カレンダーへ</a>
+  </header>
+
+  <div class="form">
+    <input id="title" placeholder="予定名" />
+
+    <div class="row">
+      <input id="date" type="date" />
+      <input id="time" type="time" />
+    </div>
+
+    <div class="row">
+      <select id="member"></select>
+      <select id="kind"></select>
+    </div>
+
+    <div class="row">
+      <select id="category"></select>
+      <select id="priority"></select>
+    </div>
+
+    <select id="repeat"></select>
+
+    <textarea id="memo" placeholder="メモ"></textarea>
+    <input id="url" placeholder="公式サイトURL" />
+
+    <button id="addBtn">追加</button>
+  </div>
+
+</div>
+
+<script type="module" src="add.js"></script>
+</body>
+</html>
