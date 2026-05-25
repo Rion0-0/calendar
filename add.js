@@ -39,3 +39,7 @@ async function addReminder() {
     addBtn.textContent = "追加";
   }
 }
+// add.js の末尾あたりに一旦追加
+console.log("member options:", member.innerHTML);
+console.log("kind options:", kind.innerHTML);
+console.log("category options:", category.innerHTML);
