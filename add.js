@@ -1,3 +1,4 @@
+alert("最新add.js読めてる！");
 import {
   MEMBERS,
   KINDS,
