@@ -282,3 +282,32 @@ button {
 .dot.task {
   border: 1.5px solid white;
 }
+
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: 24px;
+
+  width: 58px;
+  height: 58px;
+
+  border-radius: 999px;
+
+  background: linear-gradient(
+    135deg,
+    #f7b6cc,
+    #ffd8e6
+  );
+
+  color: white;
+  font-size: 32px;
+  text-decoration: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 8px 24px rgba(255, 160, 190, 0.35);
+
+  z-index: 1000;
+}
