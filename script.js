@@ -42,6 +42,10 @@ const filterMember =
 const filterKind =
   document.getElementById("filterKind");
 
+const memberToggleArea =
+  document.getElementById("memberToggleArea");
+
+let visibleMembers = [...MEMBERS];
 let reminders = [];
 
 function fillSelect(select, items){
