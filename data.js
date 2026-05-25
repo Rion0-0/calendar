@@ -8,6 +8,16 @@ export const MEMBERS = [
   "二階堂高嗣"
 ];
 
+export const MEMBER_COLORS = {
+  "Kis-My-Ft2": "#f4a6c1",
+  "千賀健永": "#7fc8ff",
+  "宮田俊哉": "#b58cff",
+  "横尾渉": "#ff9f43",
+  "藤ヶ谷太輔": "#ff8fb3",
+  "玉森裕太": "#ffd84d",
+  "二階堂高嗣": "#7bd88f"
+};
+
 export const KINDS = [
   "仕事",
   "事務"
