@@ -9,6 +9,8 @@ import {
   query
 } from "./firebase.js";
 
+import { MEMBER_COLORS } from "./data.js";
+
 const monthTitle = document.getElementById("monthTitle");
 const calendar = document.getElementById("calendar");
 const selectedDateTitle = document.getElementById("selectedDateTitle");
