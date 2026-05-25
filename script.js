@@ -120,7 +120,31 @@ function renderCalendar(items) {
   for (let day = 1; day <= daysInMonth; day++) {
     const dateStr = makeDateString(currentYear, currentMonth, day);
 
-    const dayItems = items.filter((item) => item.date === dateStr);
+const dayItems = items.filter((item) => {
+  if (item.date === dateStr) return true;
+
+  if (item.repeat === "weekly") {
+    const original = new Date(item.date);
+    const current = new Date(dateStr);
+
+    return (
+      original.getDay() === current.getDay() &&
+      current >= original
+    );
+  }
+
+  if (item.repeat === "monthly") {
+    const original = new Date(item.date);
+    const current = new Date(dateStr);
+
+    return (
+      original.getDate() === current.getDate() &&
+      current >= original
+    );
+  }
+
+  return false;
+});
 
     const cell = document.createElement("div");
     cell.className = "day";
