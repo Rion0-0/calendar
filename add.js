@@ -24,11 +24,9 @@ const url = document.getElementById("url");
 const form = document.getElementById("addForm");
 
 function fillSelect(select, items) {
-  if (!select) return;
-
   select.innerHTML = "";
 
-  items.forEach(item => {
+  items.forEach((item) => {
     const option = document.createElement("option");
 
     if (typeof item === "string") {
@@ -51,60 +49,66 @@ fillSelect(repeat, REPEATS);
 
 const templates = {
   tv: {
+    title: "",
     category: "📺 TV",
     kind: "メディア",
     priority: "normal"
   },
   tver: {
+    title: "",
     category: "📱 TVer期限",
     kind: "メディア",
     priority: "high"
   },
   live: {
+    title: "",
     category: "🎤 ライブ",
     kind: "現場",
     priority: "high"
   },
   payment: {
+    title: "",
     category: "💸 入金期限",
     kind: "事務",
     priority: "high"
   },
   result: {
+    title: "",
     category: "🎯 当落",
     kind: "事務",
     priority: "high"
   },
   magazine: {
+    title: "",
     category: "📚 雑誌",
     kind: "メディア",
     priority: "normal"
   }
 };
 
-document.querySelectorAll("[data-template]").forEach(button => {
+document.querySelectorAll("[data-template]").forEach((button) => {
   button.addEventListener("click", () => {
-    const key = button.dataset.template;
-    const template = templates[key];
-
+    const template = templates[button.dataset.template];
     if (!template) return;
 
     category.value = template.category;
     kind.value = template.kind;
     priority.value = template.priority;
+
+    title.focus();
   });
 });
 
-form.addEventListener("submit", async e => {
-  e.preventDefault();
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
 
-  if (!title.value || !date.value) {
+  if (!title.value.trim() || !date.value) {
     alert("タイトルと日付は入れてね！");
     return;
   }
 
   const reminder = {
-    title: title.value,
+    title: title.value.trim(),
     date: date.value,
     time: time.value || "",
     member: member.value,
@@ -112,8 +116,8 @@ form.addEventListener("submit", async e => {
     category: category.value,
     priority: priority.value,
     repeat: repeat.value,
-    memo: memo.value || "",
-    url: url.value || "",
+    memo: memo.value.trim(),
+    url: url.value.trim(),
     done: false,
     createdAt: new Date()
   };
@@ -123,7 +127,7 @@ form.addEventListener("submit", async e => {
     alert("予定を追加したよ！");
     window.location.href = "./index.html";
   } catch (error) {
-    console.error(error);
-    alert("追加できなかった…！Console見てみて！");
+    console.error("追加エラー:", error);
+    alert("追加できなかった…Consoleを見てね！");
   }
 });
