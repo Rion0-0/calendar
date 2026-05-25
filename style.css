@@ -336,3 +336,11 @@ button {
 .template-btn:active {
   transform: scale(0.96);
 }
+
+input,
+select,
+textarea {
+  color: #333;
+}
+
+import("./data.js").then(m => console.log(m))
