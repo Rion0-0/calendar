@@ -49,47 +49,52 @@ fillSelect(repeat, REPEATS);
 
 const templates = {
   tv: {
-    kind: "メディア",
-    category: "TV",
+    kind: "仕事",
+    category: "📺 TV",
     priority: "normal",
     memo: ""
   },
-
   tver: {
-    kind: "事務",
-    category: "TVer",
+    kind: "仕事",
+    category: "📱 TVer期限",
     priority: "high",
     memo: "見逃し配信期限"
   },
-
   live: {
-    kind: "現場",
-    category: "ライブ",
+    kind: "仕事",
+    category: "🎤 ライブ",
     priority: "high",
     memo: ""
   },
-
   payment: {
-    kind: "事務",
-    category: "入金期限",
+    kind: "仕事",
+    category: "💸 入金期限",
     priority: "high",
     memo: "忘れずに入金"
   },
-
   lottery: {
-    kind: "事務",
-    category: "当落",
+    kind: "仕事",
+    category: "🎯 当落",
     priority: "high",
     memo: "当落確認"
   },
-
   magazine: {
-    kind: "メディア",
-    category: "雑誌",
+    kind: "仕事",
+    category: "📚 雑誌",
     priority: "normal",
     memo: ""
   }
 };
+
+function setSelectValue(select, value) {
+  const option = [...select.options].find((opt) => {
+    return opt.value === value || opt.textContent === value;
+  });
+
+  if (option) {
+    select.value = option.value;
+  }
+}
 
 document.querySelectorAll(".template-btn").forEach((button) => {
   button.addEventListener("click", () => {
@@ -97,9 +102,10 @@ document.querySelectorAll(".template-btn").forEach((button) => {
 
     if (!template) return;
 
-    kind.value = template.kind;
-    category.value = template.category;
-    priority.value = template.priority;
+    setSelectValue(kind, template.kind);
+    setSelectValue(category, template.category);
+    setSelectValue(priority, template.priority);
+
     memo.value = template.memo || "";
   });
 });
@@ -159,5 +165,3 @@ async function createRepeats(base) {
     });
   }
 }
-button.addEventListener("click", () => {
-  alert("テンプレ押せた！");
