@@ -324,3 +324,37 @@ window.toggleDone = async function(id, done) {
     done: !done
   });
 };
+
+window.editReminder = async function(id) {
+  const item = reminders.find((reminder) => reminder.id === id);
+
+  if (!item) {
+    alert("予定が見つからなかった…！");
+    return;
+  }
+
+  const newTitle = prompt("タイトルを編集", item.title);
+  if (newTitle === null) return;
+
+  const newDate = prompt("日付を編集（例：2026-05-04）", item.date);
+  if (newDate === null) return;
+
+  const newTime = prompt("時間を編集（例：19:00 / 空欄OK）", item.time || "");
+  if (newTime === null) return;
+
+  const newMemo = prompt("メモを編集", item.memo || "");
+  if (newMemo === null) return;
+
+  const newUrl = prompt("URLを編集", item.url || "");
+  if (newUrl === null) return;
+
+  await updateDoc(doc(remindersRef, id), {
+    title: newTitle.trim(),
+    date: newDate.trim(),
+    time: newTime.trim(),
+    memo: newMemo.trim(),
+    url: newUrl.trim()
+  });
+
+  alert("編集したよ！");
+};
