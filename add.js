@@ -1,4 +1,3 @@
-alert("最新add.js読めてる！");
 import {
   MEMBERS,
   KINDS,
@@ -20,11 +19,14 @@ const kind = document.getElementById("kind");
 const category = document.getElementById("category");
 const priority = document.getElementById("priority");
 const repeat = document.getElementById("repeat");
+const repeatWeekday = document.getElementById("repeatWeekday");
 const memo = document.getElementById("memo");
 const url = document.getElementById("url");
 const form = document.getElementById("addForm");
 
 function fillSelect(select, items) {
+  if (!select) return;
+
   select.innerHTML = "";
 
   items.forEach((item) => {
@@ -50,37 +52,31 @@ fillSelect(repeat, REPEATS);
 
 const templates = {
   tv: {
-    title: "",
     category: "📺 TV",
     kind: "メディア",
     priority: "normal"
   },
   tver: {
-    title: "",
     category: "📱 TVer期限",
     kind: "メディア",
     priority: "high"
   },
   live: {
-    title: "",
     category: "🎤 ライブ",
     kind: "現場",
     priority: "high"
   },
   payment: {
-    title: "",
     category: "💸 入金期限",
     kind: "事務",
     priority: "high"
   },
   result: {
-    title: "",
     category: "🎯 当落",
     kind: "事務",
     priority: "high"
   },
   magazine: {
-    title: "",
     category: "📚 雑誌",
     kind: "メディア",
     priority: "normal"
@@ -100,6 +96,21 @@ document.querySelectorAll("[data-template]").forEach((button) => {
   });
 });
 
+function updateRepeatWeekdayState() {
+  if (!repeatWeekday) return;
+
+  if (repeat.value === "weekly") {
+    repeatWeekday.disabled = false;
+  } else {
+    repeatWeekday.value = "";
+    repeatWeekday.disabled = true;
+  }
+}
+
+updateRepeatWeekdayState();
+
+repeat.addEventListener("change", updateRepeatWeekdayState);
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -117,6 +128,7 @@ form.addEventListener("submit", async (event) => {
     category: category.value,
     priority: priority.value,
     repeat: repeat.value,
+    repeatWeekday: repeatWeekday?.value || "",
     memo: memo.value.trim(),
     url: url.value.trim(),
     done: false,
